@@ -1,5 +1,54 @@
 extends layout
+block append css
+  style(type="text/css")
+      body {background-image:url('/images/rackspace_logo_guy.jpeg');  background-repeat:no-repeat; background-attachment:fixed; background-position: 95% 95%;}
 
 block content
-  h1= title
-  p Welcome to #{title}
+  div.span6
+    h1 raxURL
+      br
+      small Rackspace Short URL Service
+    hr
+    h2 Create
+    div.span4
+      form(id="add-url", method="POST").form-horizontal
+        div.control-group
+          label(for="long_url").control-label
+            | Long URL
+          div.controls
+            input(type="text", name="long_url")
+        div.control-group
+          label(for="short_url").control-label
+            | Desired URL
+            br
+            small.muted optional
+          div.controls
+            input(type="text", name="short_url")
+        div.control-group
+          label(for="notes").control-label
+            | Notes
+            br
+            small.muted optional
+          div.controls
+            textarea(type="textbox", rows="3", name="notes")
+        input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-primary
+
+    div.span6
+      hr
+      h2 Features
+      h4 Queries redirected to search.rackspace.com
+      p rax.io/?knowledge management => https://search.rackspace.com/search?q=knowledge+management
+
+      h4 QR-Codes (for Posters)
+      p rax.io/knowledge-management.qrcode:
+      img(src="http://chart.apis.google.com/chart?cht=qr&chs=120x120&chld=H&choe=UTF-8&chl=rax.io%2Fknowledge-management") 
+      p Dynamically generated on query, click to copy to clipboard.
+
+      h4 Plus suffix to edit
+
+      p To see how many clicks that link has gotten and explore other info, simply append a plus sign to the end of the url:
+      p rax.io/401k+ => edit.rax.io/401k
+
+      h4 VPN Checking
+
+      p raxURL (will) be VPN Aware. It should be accessible from outside 10.x.x.x space to allow mobile clients/QR Codes to work, and should provide an alert if it's unable to redirect the user to the URL because they're not on the VPN.
