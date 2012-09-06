@@ -1,4 +1,6 @@
 
+var util = require('util');
+
 var INTEGRITY_ERROR = 19;
 /**
  * makeClass - By John Resig (MIT Licensed)
@@ -41,7 +43,22 @@ exports.die = function () {
   process.exit(1);
 };
 
-/**
- * Takes a username and password and returns a basic auth token fully formed
- *
- */
+exports.format_time = function(date_time){
+  var date;
+
+  if (!date_time){
+    return "";
+  }
+  
+  if (!util.isDate(date_time)){
+    date = new Date(date_time);
+  } else{
+    date = date_time;
+  }
+  if (!util.isDate(date)){
+    return date_time;
+  }
+  return util.format('%s-%s-%s %s:%s UTC', date.getUTCMonth(),
+    date.getUTCDate(), date.getUTCFullYear(),
+    date.getUTCHours(), date.getUTCMinutes());
+};

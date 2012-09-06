@@ -65,6 +65,19 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+app.locals({
+  time: utils.format_time
+});
+
+app.get('/all', function(req, res, next){
+  db.get_db().all("SELECT * FROM urls ORDER BY count DESC LIMIT 100;", function(err, rows){
+    if (err){
+      console.log(err);
+    }
+    headers = _.keys(rows[0]);
+    res.render('by-count.jade', {rows: rows, headers: headers});
+  });
+});
 // Root and Queries
 app.get('/', function(req, res) {
   var query;
