@@ -10,10 +10,11 @@ var url = require('url'),
 
     _ = require('underscore'),
     express = require('express'),
-    
     db = require('./db'),
     log = require('./log'),
+
     utils = require('./utils'),
+    qr = require('./qrcode'),
 
     app = express();
 
@@ -23,7 +24,7 @@ function url_lookup(req, res, next) {
 
   db.get_by_short_url(short_url, function(err, results){
     var parsed_url;
-    
+
     if (err){
       return console.error(err);
     }
@@ -34,7 +35,7 @@ function url_lookup(req, res, next) {
     }
 
     console.log("Success! Redirecting to", results.long_url);
-    
+
     // don't wait on the db to redirect
     db.increment_url(short_url);
 
@@ -79,6 +80,25 @@ app.get('/', function(req, res) {
 });
 
 // Lookups
+app.get('/edit/:url', function(req,res){
+  var short_url = req.params.url;
+  db.get_by_short_url(short_url, function(err, results){
+    if (results === undefined) {
+      res.redirect("/");
+    } else {
+      res.render('edit', {results: results});
+    }
+  });
+});
+
+app.get('/qr/:url', function (req,res) {
+  var short_url = req.params.url;
+  qr.return_qr("http://rax.io/" + short_url, function(png_data) {
+    res.set('Content-Type', 'image/png');
+    res.send(png_data);
+  });
+});
+
 app.get('/:url', url_lookup);
 
 app.post('/', function(req, res) {
@@ -116,7 +136,7 @@ db.create_tables(function(err, res){
   process.on('uncaughtException', function(err) {
     console.log(err.stack ? err.stack : err.toString());
   });
-  
+
   http.createServer(app).listen(app.get('port'), function(){
     console.log("Express server listening on port " + app.get('port'));
   });

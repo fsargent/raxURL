@@ -10,6 +10,7 @@
     "jade": "*",
     "underscore": "*",
     "sqlite3": "~2.1.5",
-    "async": ""
+    "async": "",
+    "qr": "~0.1.4"
   }
 }
