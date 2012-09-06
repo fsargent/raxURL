@@ -9,6 +9,7 @@
     "express": "3.0.0rc4",
     "jade": "*",
     "underscore": "*",
-    "sqlite3": "~2.1.5"
+    "sqlite3": "~2.1.5",
+    "async": ""
   }
 }
