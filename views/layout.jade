@@ -1,13 +1,27 @@
 doctype 5
 html
   head
-
     block scripts
       script(src='/bootstrap/js/bootstrap.min.js')
 
     block css
       link(href='/bootstrap/css/bootstrap.css', rel='stylesheet')
       link(rel='stylesheet', href='/stylesheets/style.css')
+      style(type="text/css")
+        body {background-image:url('/images/rackspace_logo_guy.jpeg');  background-repeat:no-repeat; background-attachment:fixed; background-position: 95% 95%;}
 
   body
+    a(href="https://github.com/fsargent/raxURL/")
+      img(style="position: absolute; top: 0px; right: 0; border: 0;", src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png", alt="Fork me on GitHub")
+
+    div
+      h1 
+        a(href="/") raxURL
+        br
+        small Rackspace Short URL Service 
+          a(href="/all") -check it out
+      hr
+    a(href="https://github.com/fsargent/raxURL/")
+      img(style="position: absolute; top: 0px; right: 0; border: 0;", src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png", alt="Fork me on GitHub")
+
     block content
