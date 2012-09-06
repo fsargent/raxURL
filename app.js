@@ -3,18 +3,39 @@
  * Module dependencies.
  */
 
-var express = require('express'),
+var url = require('url'),
+    path = require('path'),
     http = require('http'),
+    util = require('util'),
+
+    _ = require('underscore'),
+    express = require('express'),
+    
     db = require('./db'),
     log = require('./log'),
-    _ = require('underscore'),
-    url = require('url'),
-    path = require('path');
+    utils = require('./utils'),
 
-var app = express();
+    app = express();
 
-var util = require('util');
-var utils = require('./utils');
+
+function url_lookup(req, res, next) {
+  var short_url = req.params.url;
+  var long_url;
+  db.get_by_short_url(short_url, function(err, results){
+
+    if (results === undefined) {
+      //TODO: set 404 status and a flash message
+      return res.redirect("/");
+    }
+    console.log("Success! Redirecting to", long_url.href);
+    if (long_url.protocol){
+      return res.redirect(long_url.href);
+    }
+
+    return res.redirect("http://"+long_url.href);
+
+  });
+}
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -32,43 +53,17 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-db.init(function(){});
-db.create_tables(function(){});
-
-function url_lookup(req, res, next) {
-  var short_url = req.params.url;
-  var long_url;
-  db.get_by_short_url(short_url, function(err, results){
-    if (results === undefined) {
-      res.redirect("/");
-    } else {
-      // TODO: setup a validator on the form so this can be removed.
-      try {
-        long_url = url.parse(results.long_url);
-      } catch(e) {
-        console.log("Long URL is not a URL: ", results.long_url, e);
-      }
-      console.log("Success! Redirecting to", long_url.href);
-      if (long_url.protocol){
-        res.redirect(long_url.href);
-      } else {
-        res.redirect("http://"+long_url.href);
-      }
-    }
-  });
-}
-
 // Root and Queries
 app.get('/', function(req, res) {
-  if (_.isEmpty(req.query) === false) {
-    var query = _.keys(req.query);
-    console.log(query);
-    res.redirect(
-      "https://search.rackspace.com/search?q=" +
-       query +
-      "&proxystylesheet=default_frontend");
+  var query;
+  if (_.isEmpty(req.query)) {
+    return res.render('index');
   }
-  res.render('index');
+  query = _.keys(req.query);
+  console.log(query);
+  res.redirect( "https://search.rackspace.com/search?q=" +
+     query +
+    "&proxystylesheet=default_frontend");
 });
 
 // Lookups
@@ -102,9 +97,20 @@ app.post('/', function(req, res) {
 });
 
 
-http.createServer(app).listen(app.get('port'), function(){
+db.create_tables(function(err, res){
+  if (err){
+    return console.error(err);
+  }
   process.on('uncaughtException', function(err) {
     console.log(err.stack ? err.stack : err.toString());
   });
-  console.log("Express server listening on port " + app.get('port'));
+  
+  http.createServer(app).listen(app.get('port'), function(){
+    console.log("Express server listening on port " + app.get('port'));
+  });
 });
+
+
+
+
+
