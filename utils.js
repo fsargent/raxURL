@@ -1,4 +1,5 @@
 
+var INTEGRITY_ERROR = 19;
 /**
  * makeClass - By John Resig (MIT Licensed)
  * Takes a function and ensures that new is called so that __this__ is properly bound
@@ -27,6 +28,10 @@ exports.make_class = function(proto){
     f.prototype = proto;
   }
   return f;
+};
+
+exports.is_integrity_error = function(err){
+  return (err && err.errno === INTEGRITY_ERROR);
 };
 
 exports.die = function () {

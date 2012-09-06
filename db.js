@@ -28,8 +28,6 @@ var log = require('./log');
 
 var db;
 
-var INTEGRITY_ERROR = 19;
-
 var SCHEMA = [
   "CREATE TABLE IF NOT EXISTS urls " +
   "(long_url VARCHAR(1024) NOT NULL, " +
@@ -68,7 +66,7 @@ module.exports = new utils.make_class({
   squelch_integrity_error: function (cb) {
     var self = this;
     return function (err, result) {
-      if (err && err.errno === INTEGRITY_ERROR) {
+      if (utils.is_integrity_error(err)) {
         err = null;
       }
       if (cb) {

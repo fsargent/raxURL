@@ -14,12 +14,17 @@ block content
     hr
     h2 Create
     div.span4
+      -var long_url = long_url
+      -var short_url = short_url
+      -var notes = notes
+      -var err = err
+      -var msg = msg
       form(id="add-url", method="POST").form-horizontal
         div.control-group
           label(for="long_url").control-label
             | Long URL
           div.controls
-            input(type="text", name="long_url", placeholder="www.rackspace.com/long_url")
+            input(type="text", name="long_url", placeholder="www.rackspace.com/long_url", value=long_url)
         div.control-group
 
           label(for="short_url").control-label
@@ -33,7 +38,7 @@ block content
               input(
                 style="width: 150px;"
                 type="text", name="short_url",
-                id="prependedInput", placeholder="short name"
+                id="prependedInput", placeholder="short name", value=short_url
               )
         div.control-group
           label(for="notes").control-label
@@ -41,8 +46,15 @@ block content
             br
             small.muted optional
           div.controls
-            textarea(type="textbox", rows="3", name="notes")
-        input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-inverse
+            textarea(type="textbox", rows="3", name="notes")=notes
+        div.control-group
+          input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-inverse
+
+        div.control-group.span5
+          if err
+            div.alert.alert-error!=err
+          if msg
+            div.alert.alert-success!=msg
 
     div.span6
       hr

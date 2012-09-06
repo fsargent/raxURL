@@ -13,6 +13,8 @@ var express = require('express'),
 
 var app = express();
 
+var util = require('util');
+var utils = require('./utils');
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -78,18 +80,31 @@ app.post('/', function(req, res) {
   var short_url = data.short_url;
   var notes = data.notes;
   var date_created = new Date();
+  var err;
 
-  // Validation
-  console.log(data);
-  console.log(long_url);
+  if (long_url === undefined || short_url === undefined){
+    return res.render('index.jade', {form_err: 'You must specify a long and short url.'});
+  }
 
   db.add_url(long_url, short_url, notes, date_created, function(err, results){
-    res.render('index.jade', {err: err, results: results});
+    var form = {msg: null, err: null, long_url: long_url, short_url: short_url, notes: notes};
+
+    if (utils.is_integrity_error(err)){
+      form.err = util.format("That short url already exists.  Do you want to <a href='%s+'>edit</a> it?", short_url);
+    } else if (err){
+      form.err = err.toString();
+    }else{
+      form.msg = util.format("You successfully created your link: <a href='%s'>%s</a>!", short_url, short_url);
+    }
+
+    res.render('index.jade', form);
   });
 });
 
 
-
 http.createServer(app).listen(app.get('port'), function(){
+  process.on('uncaughtException', function(err) {
+    console.log(err.stack ? err.stack : err.toString());
+  });
   console.log("Express server listening on port " + app.get('port'));
 });
