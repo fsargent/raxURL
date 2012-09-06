@@ -32,7 +32,7 @@ var SCHEMA = [
   "CREATE TABLE IF NOT EXISTS urls " +
   "(long_url VARCHAR(1024) NOT NULL, " +
   "short_url VARCHAR(1024) NOT NULL, " +
-  "count INTEGER DEFAULT 1" +
+  "count INTEGER DEFAULT 1, " +
   "notes TEXT, " +
   "created_at TIMESTAMP, " +
   "updated_at TIMESTAMP, " +
@@ -83,6 +83,11 @@ module.exports = new utils.make_class({
     var self = this;
     return self.db.get("SELECT * FROM urls WHERE short_url=?;",
       short_url, cb);
+  },
+  increment_url: function(short_url){
+    var self = this;
+
+    return self.db.run("UPDATE urls SET count = count + 1 WHERE short_url = ?", short_url);
   },
   add_url: function (long_url, short_url, notes, created_at, cb) {
     var self = this;
