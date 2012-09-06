@@ -1,0 +1,23 @@
+extends layout
+block append css
+  style(type="text/css")
+    td
+
+block content
+  div.span12
+    table.table.table-bordered.table-striped
+      thead
+        tr
+          each header in headers
+            th=header
+      body
+        each row in rows
+          tr
+            each data,key in row
+              if (key === 'short_url' || key === "long_url")
+                td
+                  a(href=data)=data
+              else if (key === "created_at" || key === "updated_at")
+                td #{time(data)} 
+              else
+                td #{data}
