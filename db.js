@@ -82,17 +82,17 @@ module.exports = new utils.make_class({
   },
   get_by_short_url: function(short_url, cb){
     var self = this;
-    return self.db.get("SELECT long_url FROM urls where short_url=?;",
+    return self.db.get("SELECT * FROM urls WHERE short_url=?;",
       short_url, cb);
   },
   add_url: function (long_url, short_url, notes, created_at, cb) {
     var self = this;
-    try{
-      long_url = validate_url(long_url);
-      short_url = validate_url(short_url);
-    } catch(e){
-      return cb(e);
-    }
+    // try{
+    //   long_url = validate_url(long_url);
+    //   short_url = validate_url(short_url);
+    // } catch(e){
+    //   return cb(e);
+    // }
     return self.db.run("INSERT INTO urls (long_url, short_url, notes, created_at) VALUES (?, ?, ?, ?);", [long_url, short_url, notes, created_at], function(err){
       if (err){
         console.log(err);
