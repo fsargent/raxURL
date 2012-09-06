@@ -32,6 +32,7 @@ var SCHEMA = [
   "CREATE TABLE IF NOT EXISTS urls " +
   "(long_url VARCHAR(1024) NOT NULL, " +
   "short_url VARCHAR(1024) NOT NULL, " +
+  "count INTEGER DEFAULT 1" +
   "notes TEXT, " +
   "created_at TIMESTAMP, " +
   "updated_at TIMESTAMP, " +
