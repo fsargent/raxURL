@@ -4,6 +4,9 @@ block append css
       body {background-image:url('/images/rackspace_logo_guy.jpeg');  background-repeat:no-repeat; background-attachment:fixed; background-position: 95% 95%;}
 
 block content
+  a(href="https://github.rackspace.com/feli4039/raxURL")
+    img(style="position: absolute; top: 0px; right: 0; border: 0;", src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png", alt="Fork me on GitHub")
+
   div.span6
     h1 raxURL
       br
@@ -16,14 +19,22 @@ block content
           label(for="long_url").control-label
             | Long URL
           div.controls
-            input(type="text", name="long_url")
+            input(type="text", name="long_url", placeholder="www.rackspace.com/long_url")
         div.control-group
+
           label(for="short_url").control-label
             | Desired URL
             br
             small.muted optional
           div.controls
-            input(type="text", name="short_url")
+            div.input-prepend
+              span.add-on
+                |rax.io/
+              input(
+                style="width: 150px;"
+                type="text", name="short_url",
+                id="prependedInput", placeholder="short name"
+              )
         div.control-group
           label(for="notes").control-label
             | Notes
@@ -31,7 +42,7 @@ block content
             small.muted optional
           div.controls
             textarea(type="textbox", rows="3", name="notes")
-        input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-primary
+        input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-inverse
 
     div.span6
       hr
