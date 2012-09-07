@@ -19,9 +19,12 @@ block content
         each row in rows
           tr
             each data,key in row
-              if (key === 'short_url' || key === "long_url")
+              if (key === 'long_url')
                 td
-                  a(href=data)=data
+                  a(href="http://"+data)=data
+              else if (key === 'short_url')
+                td
+                  a(href="/edit/"+data)=data
               else if (key === "created_at" || key === "updated_at")
                 td #{time(data)}
               else

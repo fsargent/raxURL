@@ -5,7 +5,9 @@ block append css
 
 block content
   div.span6
-    h1 rax.io/
+    h1
+      a(style="color:black", href="/")
+        |rax.io/
       span.muted #{results.short_url}
     hr
     h2 QR Code
@@ -14,29 +16,28 @@ block content
     hr
     h2 Edit
     div.span4
-      form(id="add-url", method="POST").form-horizontal
-          div.control-group
-            label(for="long_url").control-label
-              | Long URL
-            div.controls
-              input(type="text", name="long_url", value=results.long_url)
-          div.control-group
-
-            label(for="short_url").control-label
-              | Desired URL
-              br
-              small.muted optional
-            div.controls
-              div.input-prepend
-                span.add-on
-                  |rax.io/
-                span(style="width: 150px;").uneditable-input
-                  |#{results.short_url}
-          div.control-group
-            label(for="notes").control-label
-              | Notes
-              br
-              small.muted optional
-            div.controls
-              textarea(type="textbox", rows="3", name="notes") #{results.notes}
-          input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-inverse
+      form(id="edit-url", method="POST").form-horizontal
+        div.control-group
+          label(for="long_url").control-label
+            | Long URL
+          div.controls
+            input(type="text", name="long_url", value=results.long_url)
+        div.control-group
+          label(for="short_url").control-label
+            | Short URL
+            br
+            small.muted optional
+          div.controls
+            div.input-prepend
+              span.add-on
+                |rax.io/
+              span(style="width: 150px;").uneditable-input
+                |#{results.short_url}
+        div.control-group
+          label(for="notes").control-label
+            | Notes
+            br
+            small.muted optional
+          div.controls
+            textarea(type="textbox", rows="3", name="notes") #{results.notes}
+        input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-inverse

@@ -86,7 +86,6 @@ app.get('/', function(req, res) {
     return res.render('index');
   }
   query = _.keys(req.query);
-  console.log(query);
   res.redirect( "https://search.rackspace.com/search?q=" +
      query +
     "&proxystylesheet=default_frontend");
@@ -113,6 +112,29 @@ app.get('/qr/:url', function (req,res) {
 });
 
 app.get('/:url', url_lookup);
+
+
+app.post('/edit/:url', function(req, res) {
+  var data = req.body;
+  var long_url = data.long_url;
+  var short_url = req.params.url;
+  var notes = data.notes;
+  var updated_at = new Date();
+  var err;
+
+  if (long_url === undefined){
+    return res.render('edit.jade', {form_err: 'You must specify a long url.'});
+  }
+  db.edit_url(long_url, notes, updated_at, short_url, function(err, results){
+    db.get_by_short_url(short_url, function(err, results){
+      if (results === undefined) {
+        res.redirect("/");
+      } else {
+        res.render('edit', {results: results});
+      }
+    });
+  });
+});
 
 app.post('/', function(req, res) {
   var data = req.body;
@@ -154,8 +176,3 @@ db.create_tables(function(err, res){
     console.log("Express server listening on port " + app.get('port'));
   });
 });
-
-
-
-
-
