@@ -75,7 +75,7 @@ app.get('/all', function(req, res, next){
     if (err){
       console.log(err);
     }
-    headers = _.keys(rows[0]);
+    headers = rows.length > 0 ? _.keys(rows[0]) : [];
     res.render('by-count.jade', {rows: rows, headers: headers});
   });
 });
