@@ -4,6 +4,12 @@ block append css
 
 block content
   div.span6
+    h1
+      a(style="color:black",href="/all")
+        |raxURL
+      br
+      small Rackspace Short URL Service
+    hr
     h2 Create
     div.span4
       -var long_url = long_url
@@ -51,19 +57,24 @@ block content
     div.span6
       hr
       h2 Features
-      h4 Queries redirected to search.rackspace.com
-      p rax.io/?knowledge management => https://search.rackspace.com/search?q=knowledge+management
-
-      h4 QR-Codes (for Posters)
-      p rax.io/knowledge-management.qrcode:
-      img(src="http://chart.apis.google.com/chart?cht=qr&chs=120x120&chld=H&choe=UTF-8&chl=rax.io%2Fknowledge-management") 
-      p Dynamically generated on query, click to copy to clipboard.
-
-      h4 Plus suffix to edit
-
-      p To see how many clicks that link has gotten and explore other info, simply append a plus sign to the end of the url:
-      p rax.io/401k+ => edit.rax.io/401k
-
-      h4 VPN Checking
-
-      p raxURL (will) be VPN Aware. It should be accessible from outside 10.x.x.x space to allow mobile clients/QR Codes to work, and should provide an alert if it's unable to redirect the user to the URL because they're not on the VPN.
+      div
+        h4 Queries redirected to 
+          a(style="color:black", href="search.rackspace.com") search.rackspace.com
+        pre.pre-scrollable
+          | rax.io/?knowledge management 
+          i.icon-arrow-right
+          br
+          | https://search.rackspace.com/search?q=knowledge+management
+      div
+        h4 QR-Codes (for Posters)
+        p Dynamically generated on query.
+        pre http://rax.io/knowledge-management:
+          div(style="text-align:center")
+            img(src="qr/knowledge-management")
+      div
+        h4 Easy Edit
+        p To see how many clicks that link has gotten and explore other info, simply append a plus sign to the end of the url:
+        pre.prettyprint
+          |rax.io/401k+ 
+          i.icon-arrow-right
+          |  rax.io/edit/401k

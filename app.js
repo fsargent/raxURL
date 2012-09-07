@@ -130,11 +130,11 @@ app.post('/', function(req, res) {
     var form = {msg: null, err: null, long_url: long_url, short_url: short_url, notes: notes};
 
     if (utils.is_integrity_error(err)){
-      form.err = util.format("That short url already exists.  Do you want to <a href='/%s+'>edit</a> it?", short_url);
+      form.err = util.format("<strong>That short url already exists.</strong><br>Do you want to <a href='edit/%s'>edit</a> it?", short_url);
     } else if (err){
       form.err = err.toString();
     }else{
-      form.msg = util.format("You successfully created your link: <a href='/%s'>%s</a>!", short_url, short_url);
+      form.msg = util.format("Successfully created your link: <a href='edit/%s'>%s</a>!", short_url, short_url);
     }
 
     res.render('index.jade', form);
