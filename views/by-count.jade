@@ -4,6 +4,11 @@ block append css
     td
 
 block content
+  div.span6
+    h5
+      a(style="color:black",href="/")
+        i.icon-arrow-left
+        |Back
   div.span12
     table.table.table-bordered.table-striped
       thead
@@ -18,6 +23,6 @@ block content
                 td
                   a(href=data)=data
               else if (key === "created_at" || key === "updated_at")
-                td #{time(data)} 
+                td #{time(data)}
               else
                 td #{data}
