@@ -7,12 +7,13 @@ block content
   div.span6
     h1
       a(style="color:black", href="/")
-        |rax.io/
-      span.muted #{results.short_url}
+        |rax.io
+      span.muted /#{results.short_url}
     hr
     h2 QR Code
     div(style="text-align:center")
-      img(src="/qr/#{results.short_url}")
+      a(href="/qr/#{results.short_url}?size=6")
+        img(src="/qr/#{results.short_url}")
     hr
     h2 Edit
     div.span4

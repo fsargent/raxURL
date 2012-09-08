@@ -20,7 +20,12 @@ block content
             each data,key in row
               if (key === 'long_url')
                 td
-                  a(href="http://"+data)=data
+                  if data.split(":")[0] === "https"
+                    a(href=data)=data
+                  else if data.split(":")[0] === "http"
+                    a(href=data)=data
+                  else
+                    a(href="http://"+data)=data
               else if (key === 'short_url')
                 td
                   a(href="/edit/"+data)=data

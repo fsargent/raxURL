@@ -104,11 +104,13 @@ app.get('/edit/:url', function(req,res){
 });
 
 app.get('/qr/:url', function (req,res) {
+  var size = req.query.size;
+  if (size === undefined || size <= 1 || size >= 90) {size = 6;}
   var short_url = req.params.url;
   qr.return_qr("http://rax.io/" + short_url, function(png_data) {
     res.set('Content-Type', 'image/png');
     res.send(png_data);
-  });
+  }, size);
 });
 
 app.get('/:url', url_lookup);
@@ -156,7 +158,7 @@ app.post('/', function(req, res) {
     } else if (err){
       form.err = err.toString();
     }else{
-      form.msg = util.format("Successfully created your link: <a href='edit/%s'>%s</a>!", short_url, short_url);
+      form.msg = util.format("Successfully created your link: <a href='edit/%s'>http://rax.io/%s</a>!", short_url, short_url);
     }
 
     res.render('index.jade', form);
