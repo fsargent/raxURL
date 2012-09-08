@@ -16,6 +16,8 @@ var url = require('url'),
     utils = require('./utils'),
     qr = require('./qrcode'),
 
+    settings = require('./settings'),
+
     app = express();
 
 
@@ -51,7 +53,7 @@ function url_lookup(req, res, next) {
 }
 
 app.configure(function(){
-  app.set('port', process.env.PORT || 3000);
+  app.set('port', settings.port || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.favicon());
