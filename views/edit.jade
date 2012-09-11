@@ -8,7 +8,8 @@ block content
     h1
       a(style="color:black", href="/")
         |rax.io
-      span.muted /#{results.short_url}
+      span.muted
+        a(style="color:#999", href="http://rax.io/#{results.short_url}") /#{results.short_url}
     hr
     h2 QR Code
     div(style="text-align:center")
@@ -27,7 +28,6 @@ block content
           label(for="short_url").control-label
             | Short URL
             br
-            small.muted optional
           div.controls
             div.input-prepend
               span.add-on
