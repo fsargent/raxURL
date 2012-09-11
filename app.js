@@ -33,7 +33,7 @@ function url_lookup(req, res, next) {
 
     if (results === undefined) {
       res.status(404);
-      return res.redirect(util.format('/%s+', short_url));
+      return res.render('404.jade');
     }
 
     console.log("Success! Redirecting to", results.long_url);
