@@ -148,7 +148,7 @@ app.post('/', function(req, res) {
   var date_created = new Date();
   var err;
 
-  if (long_url === undefined || short_url === undefined){
+  if (!long_url || !short_url){
     return res.render('index.jade', {form_err: 'You must specify a long and short url.'});
   }
 
