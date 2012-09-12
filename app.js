@@ -160,7 +160,7 @@ app.post('/', function(req, res) {
     } else if (err){
       form.err = err.toString();
     }else{
-      form.msg = util.format("Successfully created your link: <a href='edit/%s'>http://rax.io/%s</a>!", short_url, short_url);
+      form.msg = util.format("Successfully created your link: <br><a href='/%s'>http://rax.io/%s</a> <br>Generate your QR code here: <br><a href='edit/%s'>http://rax.io/edit/%s</a>", short_url, short_url, short_url, short_url);
     }
 
     res.render('index.jade', form);
