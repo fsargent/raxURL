@@ -27,7 +27,7 @@ app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.cookieParser());
-  app.use(express.session({secret: "hello world",  store: memStore }));
+  app.use(express.session({secret: settings.mem_store_secret,  store: memStore }));
   app.use(express.favicon());
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
