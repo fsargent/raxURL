@@ -13,14 +13,16 @@ var url = require('url'),
     db = require('./db'),
     log = require('./log'),
 
+    ldap = require('./node_modules/node-ldapauth/ldapauth'),
     utils = require('./utils'),
     qr = require('./qrcode'),
-
+    memStore = new express.session.MemoryStore(),
     settings = require('./settings'),
 
     app = express();
 
 
+// Middlware and utilities.
 function url_lookup(req, res, next) {
   var short_url = req.params.url;
 
@@ -52,10 +54,24 @@ function url_lookup(req, res, next) {
   });
 }
 
+function requiresLogin(req, res, next) {
+  if (req.session.user) {
+    next();
+  } else {
+    req.session.error = 'Access denied!';
+    res.redirect('/login');
+  }
+}
+
+
+
+// Configuration
 app.configure(function(){
   app.set('port', settings.port || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
+  app.use(express.cookieParser());
+  app.use(express.session({secret: "hello world",  store: memStore }));
   app.use(express.favicon());
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
@@ -72,7 +88,39 @@ app.locals({
   time: utils.format_time
 });
 
-app.get('/all', function(req, res, next){
+// ROUTES
+
+app.get('/login', function(req,res){
+  res.render('login');
+});
+
+
+app.post('/login', function(req, res){
+  var username = req.body.username,
+      password = req.body.password;
+
+  ldap_auth(username, password, function(err) {
+    if (err) {
+      console.log(JSON.stringify(err));
+      return err;
+    }
+    else {
+      return "success";
+    }
+
+  ldap.authenticate(LDAP_HOST, LDAP_PORT, username+'@DOMAIN', password, function(err, success) {
+    if (username && password && success) {
+      req.session.username = username;
+      return res.redirect(req.body.next || '/');
+    } else {
+      return res.redirect("back");
+    }
+  });
+  });
+});
+
+
+app.get('/all', requiresLogin, function(req, res){
   db.get_db().all("SELECT * FROM urls ORDER BY count DESC LIMIT 100;", function(err, rows){
     if (err){
       console.log(err);
@@ -81,8 +129,10 @@ app.get('/all', function(req, res, next){
     res.render('by-count.jade', {rows: rows, headers: headers});
   });
 });
+
+
 // Root and Queries
-app.get('/', function(req, res) {
+app.get('/', requiresLogin, function(req, res) {
   var query;
   if (_.isEmpty(req.query)) {
     return res.render('index');
@@ -93,8 +143,8 @@ app.get('/', function(req, res) {
     "&proxystylesheet=default_frontend");
 });
 
-// Lookups
-app.get('/edit/:url', function(req,res){
+
+app.get('/edit/:url', requiresLogin, function(req,res){
   var short_url = req.params.url;
   db.get_by_short_url(short_url, function(err, results){
     if (results === undefined) {
@@ -104,6 +154,7 @@ app.get('/edit/:url', function(req,res){
     }
   });
 });
+
 
 app.get('/qr/:url', function (req,res) {
   var size = req.query.size;
@@ -115,10 +166,11 @@ app.get('/qr/:url', function (req,res) {
   }, size);
 });
 
+
+
+// This is where the magic happens!
 app.get('/:url', url_lookup);
-
-
-app.post('/edit/:url', function(req, res) {
+app.post('/edit/:url', requiresLogin, function(req, res) {
   var data = req.body;
   var long_url = data.long_url;
   var short_url = req.params.url;
@@ -140,7 +192,8 @@ app.post('/edit/:url', function(req, res) {
   });
 });
 
-app.post('/', function(req, res) {
+
+app.post('/', requiresLogin, function(req, res) {
   var data = req.body;
   var long_url = data.long_url;
   var short_url = data.short_url;
@@ -166,6 +219,7 @@ app.post('/', function(req, res) {
     res.render('index.jade', form);
   });
 });
+
 
 
 db.create_tables(function(err, res){
