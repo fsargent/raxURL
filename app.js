@@ -13,13 +13,36 @@ var url = require('url'),
     db = require('./db'),
     log = require('./log'),
 
-    ldap = require('./node_modules/node-ldapauth/ldapauth'),
+    ldap = require('ldapjs'),
     utils = require('./utils'),
     qr = require('./qrcode'),
     memStore = new express.session.MemoryStore(),
     settings = require('./settings'),
 
     app = express();
+
+// Configuration
+app.configure(function(){
+  app.set('port', settings.port || 3000);
+  app.set('views', __dirname + '/views');
+  app.set('view engine', 'jade');
+  app.use(express.cookieParser());
+  app.use(express.session({secret: "hello world",  store: memStore }));
+  app.use(express.favicon());
+  app.use(express.logger('dev'));
+  app.use(express.bodyParser());
+  app.use(express.methodOverride());
+  app.use(app.router);
+  app.use(express.static(path.join(__dirname, 'public')));
+});
+
+app.configure('development', function(){
+  app.use(express.errorHandler());
+});
+
+app.locals({
+  time: utils.format_time
+});
 
 
 // Middlware and utilities.
@@ -54,8 +77,53 @@ function url_lookup(req, res, next) {
   });
 }
 
+
+function authenticate(username, password, cb) {
+
+  var LDAP_HOST = settings.ldap_host,
+      LDAP_DN = settings.ldap_dn,
+      client = ldap.createClient({
+        url: 'ldaps://' + LDAP_HOST
+      }),
+
+      dn = util.format('cn=%s,ou=Users,%s', username, LDAP_DN);
+
+  client.search(
+    LDAP_DN,
+    { scope: 'base', filter: '(uid='+username+')' },
+    function(err, res) {
+      if (err) {
+        console.log("ERROR RESPONSE: " + JSON.stringify(err));
+      }
+
+      res.on('searchEntry', function(entry) {
+        console.log('entry: ' + JSON.stringify(entry.object));
+      });
+      res.on('searchReference', function(referral) {
+        console.log('referral: ' + referral.uris.join());
+      });
+      res.on('error', function(err) {
+        console.error('error: ' + err.message);
+      });
+      res.on('end', function(result) {
+
+        console.log('status: ' + result.status);
+        client.bind(dn, password, function(err, response) {
+          if (err) {
+            console.log(JSON.stringify(err));
+            return cb(err, null);
+          } else {
+            console.log("BIND RESPONSE: "+ response);
+            return cb(null, "success");
+          }
+        });
+    });
+});
+
+}
+
 function requiresLogin(req, res, next) {
-  if (req.session.user) {
+  if (req.session.username) {
     next();
   } else {
     req.session.error = 'Access denied!';
@@ -64,61 +132,32 @@ function requiresLogin(req, res, next) {
 }
 
 
-
-// Configuration
-app.configure(function(){
-  app.set('port', settings.port || 3000);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  app.use(express.cookieParser());
-  app.use(express.session({secret: "hello world",  store: memStore }));
-  app.use(express.favicon());
-  app.use(express.logger('dev'));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-  app.use(express.static(path.join(__dirname, 'public')));
-});
-
-app.configure('development', function(){
-  app.use(express.errorHandler());
-});
-
-app.locals({
-  time: utils.format_time
-});
-
 // ROUTES
 
 app.get('/login', function(req,res){
-  res.render('login');
+  res.render('login', {flash: ""});
 });
 
 
 app.post('/login', function(req, res){
   var username = req.body.username,
       password = req.body.password;
-
-  ldap_auth(username, password, function(err) {
-    if (err) {
-      console.log(JSON.stringify(err));
-      return err;
-    }
-    else {
-      return "success";
-    }
-
-  ldap.authenticate(LDAP_HOST, LDAP_PORT, username+'@DOMAIN', password, function(err, success) {
+  authenticate(username, password, function(err, success){
     if (username && password && success) {
       req.session.username = username;
       return res.redirect(req.body.next || '/');
     } else {
-      return res.redirect("back");
+      return res.render('login', {flash: "Authentication failed."});
     }
-  });
   });
 });
 
+app.get('/logout', function(req, res) {
+  req.session.destroy(
+    function(){
+      res.redirect('login');
+  });
+});
 
 app.get('/all', requiresLogin, function(req, res){
   db.get_db().all("SELECT * FROM urls ORDER BY count DESC LIMIT 100;", function(err, rows){
@@ -132,17 +171,25 @@ app.get('/all', requiresLogin, function(req, res){
 
 
 // Root and Queries
-app.get('/', requiresLogin, function(req, res) {
-  var query;
+app.get('/', function(req, res) {
+  var query,
+      search_path = settings.search_path,
+      search_path_suffix = settings.search_path_suffix;
   if (_.isEmpty(req.query)) {
-    return res.render('index');
+    return res.redirect('/create');
   }
   query = _.keys(req.query);
-  res.redirect( "https://search.rackspace.com/search?q=" +
-     query +
-    "&proxystylesheet=default_frontend");
+  res.redirect(
+    search_path +
+    query +
+    search_path_suffix
+  );
 });
 
+
+app.get('/create', requiresLogin, function(req, res) {
+  return res.render('index');
+});
 
 app.get('/edit/:url', requiresLogin, function(req,res){
   var short_url = req.params.url;
@@ -193,7 +240,7 @@ app.post('/edit/:url', requiresLogin, function(req, res) {
 });
 
 
-app.post('/', requiresLogin, function(req, res) {
+app.post('/create', requiresLogin, function(req, res) {
   var data = req.body;
   var long_url = data.long_url;
   var short_url = data.short_url;

@@ -11,9 +11,7 @@ block content
       span.muted
         | /login
     hr
-    div(style="margin:30px 50px 30px 50px")
-      span.alert.alert-info Please login to create and edit short URLs
-
+    h5 Please login to create and edit short URLs
     form(id="edit-url", method="POST").form-horizontal
       div.control-group
         label(for="long_url").control-label
@@ -25,5 +23,9 @@ block content
           | Password
           br
         div.controls
-          input(type="text", name="password")
-      input(id="add-url-submit", type="submit", value="Login").pull-right.btn.btn-inverse
+          input(type="password", name="password")
+      input(id="add-url-submit", type="submit", value="Sign in").pull-right.btn.btn-inverse
+    if flash
+      div(style="margin:30px 100px 30px 100px")
+        span.alert.alert-danger #{flash}
+
