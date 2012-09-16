@@ -1,0 +1,31 @@
+extends layout
+block append css
+  style(type="text/css")
+      body {background-image:url('/images/rackspace_logo_guy.jpeg');  background-repeat:no-repeat; background-attachment:fixed; background-position: 95% 95%;}
+
+block content
+  div.span6
+    h1
+      a(style="color:black", href="/")
+        |rax.io
+      span.muted
+        | /login
+    hr
+    h5 Please login to create and edit short URLs
+    form(id="edit-url", method="POST").form-horizontal
+      div.control-group
+        label(for="long_url").control-label
+          | SSO
+        div.controls
+          input(type="text", name="username")
+      div.control-group
+        label(for="short_url").control-label
+          | Password
+        div.controls
+          input(type="password", name="password")
+      input(id="add-url-submit", type="submit", value="Sign in").pull-right.btn.btn-inverse
+    div.span6
+      if flash
+        div
+          span.alert.alert-danger #{flash}
+
