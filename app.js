@@ -82,44 +82,40 @@ function authenticate(username, password, cb) {
 
   var LDAP_HOST = settings.ldap_host,
       LDAP_DN = settings.ldap_dn,
+      dn = util.format('cn=%s,ou=Users,%s', username, LDAP_DN),
       client = ldap.createClient({
-        url: 'ldaps://' + LDAP_HOST
-      }),
+        url: 'ldaps://' + LDAP_HOST,
+        timeout: 3000 // timeout is 3 seconds.
+      });
 
-      dn = util.format('cn=%s,ou=Users,%s', username, LDAP_DN);
-
+  client.on('timeout', function(err) {
+    err = 'LDAP lookup timed out.';
+    console.error(err);
+    return cb(err, null);
+  });
   client.search(
     LDAP_DN,
-    { scope: 'base', filter: '(uid='+username+')' },
+    {
+      scope: 'base',
+      filter: '(uid='+username+')'
+    },
     function(err, res) {
-      if (err) {
-        console.log("ERROR RESPONSE: " + JSON.stringify(err));
-      }
-
-      res.on('searchEntry', function(entry) {
-        console.log('entry: ' + JSON.stringify(entry.object));
-      });
-      res.on('searchReference', function(referral) {
-        console.log('referral: ' + referral.uris.join());
-      });
       res.on('error', function(err) {
-        console.error('error: ' + err.message);
+        err = 'LDAP Error: ' + err.message;
+        console.error(err);
+        return cb(err, null);
       });
       res.on('end', function(result) {
-
-        console.log('status: ' + result.status);
         client.bind(dn, password, function(err, response) {
           if (err) {
-            console.log(JSON.stringify(err));
+            err = "Authentication Failed.";
             return cb(err, null);
           } else {
-            console.log("BIND RESPONSE: "+ response);
             return cb(null, "success");
           }
         });
-    });
-});
-
+      });
+  });
 }
 
 function requiresLogin(req, res, next) {
@@ -142,12 +138,17 @@ app.get('/login', function(req,res){
 app.post('/login', function(req, res){
   var username = req.body.username,
       password = req.body.password;
+if (!username || !password) {
+  return res.render('login', {
+    flash: "Please enter a username and password."
+  });
+}
   authenticate(username, password, function(err, success){
     if (username && password && success) {
       req.session.username = username;
       return res.redirect(req.body.next || '/');
     } else {
-      return res.render('login', {flash: "Authentication failed."});
+      return res.render('login', {flash: err});
     }
   });
 });

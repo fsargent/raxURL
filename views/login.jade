@@ -21,11 +21,11 @@ block content
       div.control-group
         label(for="short_url").control-label
           | Password
-          br
         div.controls
           input(type="password", name="password")
       input(id="add-url-submit", type="submit", value="Sign in").pull-right.btn.btn-inverse
-    if flash
-      div(style="margin:30px 100px 30px 100px")
-        span.alert.alert-danger #{flash}
+    div.span6
+      if flash
+        div
+          span.alert.alert-danger #{flash}
 
