@@ -9,7 +9,10 @@ block content
       a(style="color:black",href="/")
         i.icon-arrow-left
         |Back
-    table.table.table-bordered.table-striped
+      a(style="color:black",href="/logout").pull-right
+        i.icon-lock
+        |Logout
+    table.table.table-bordered.table-striped()
       thead
         tr
           each header in headers
@@ -19,7 +22,7 @@ block content
           tr
             each data,key in row
               if (key === 'long_url')
-                td
+                td(style="word-break: break-word;")
                   if data.split(":")[0] === "https"
                     a(href=data)=data
                   else if data.split(":")[0] === "http"
