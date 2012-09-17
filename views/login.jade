@@ -7,25 +7,54 @@ block content
   div.span6
     h1
       a(style="color:black", href="/")
-        |rax.io
+      |rax.io
       span.muted
         | /login
+      br
+      small Rackspace Short URL Service
     hr
-    h5 Please login to create and edit short URLs
-    form(id="edit-url", method="POST").form-horizontal
-      div.control-group
-        label(for="long_url").control-label
-          | SSO
-        div.controls
-          input(type="text", name="username")
-      div.control-group
-        label(for="short_url").control-label
-          | Password
-        div.controls
-          input(type="password", name="password")
-      input(id="add-url-submit", type="submit", value="Sign in").pull-right.btn.btn-inverse
+    blockquote
+      p.text-error Please login to create and modify short URLs
+    div.span4
+      form(id="edit-url", method="POST").form-horizontal
+        div.control-group
+          label(for="long_url").control-label
+            | Rackspace SSO
+          div.controls
+            input(type="text", name="username")
+        div.control-group
+          label(for="short_url").control-label
+            | Password
+          div.controls
+            input(type="password", name="password")
+        div.control-group
+          input(id="add-url-submit", type="submit", value="Sign in").pull-right.btn.btn-inverse
     div.span6
       if flash
         div
           span.alert.alert-danger #{flash}
-
+    div.span6
+        hr
+        h2 Features
+        div
+          h4 Fast searches on 
+            a(style="color:black", href="http://search.rackspace.com") search.rackspace.com
+          pre
+            | rax.io/?knowledge management 
+            i.icon-arrow-right
+            br
+            | https://search.rackspace.com/
+            |     search?q=knowledge+management
+        div
+          h4 QR-Codes (for Posters)
+          p Dynamically generated on query. Change size by query parameters up to 90 pixels per dot.
+          pre http://rax.io/qr/knowledge-management?size=6:
+            div(style="text-align:center")
+              img(src="qr/knowledge-management")
+        div
+          h4 Easy Edit
+          p Modify the url to get QR Codes and edit details:
+          pre.prettyprint
+            |rax.io/401k 
+            i.icon-arrow-right
+            |  rax.io/edit/401k

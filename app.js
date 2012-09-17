@@ -196,7 +196,8 @@ app.get('/edit/:url', requiresLogin, function(req,res){
   var short_url = req.params.url;
   db.get_by_short_url(short_url, function(err, results){
     if (results === undefined) {
-      res.redirect("/");
+      res.status(404);
+      return res.render('404.jade');
     } else {
       res.render('edit', {results: results});
     }
