@@ -228,10 +228,10 @@ app.post('/edit/:url', requiresLogin, function(req, res) {
   var err;
 
   if (long_url === ""){
-    // Should  have an error to the user here.
+    // Should have an error to the user here.
     return res.redirect('back');
   }
-  if (long_url.indexOf('rax.io') !== -1) {
+  if (long_url.indexOf('rax.io/'+short_url) !== -1) {
     return res.render('index.jade', {err: 'Haha, nice try. Please do not try to create redirect loops.'});
   }
   db.edit_url(long_url, notes, updated_at, short_url, function(err, results){
@@ -258,7 +258,7 @@ app.post('/create', requiresLogin, function(req, res) {
     return res.render('index.jade', {err: 'You must specify a long and short url.'});
   }
 
-  if (long_url.indexOf('rax.io') !== -1) {
+  if (long_url.indexOf('rax.io/'+short_url) !== -1) {
     return res.render('index.jade', {err: 'Haha, nice try. Please do not try to create redirect loops.'});
   }
   db.add_url(long_url, short_url, notes, date_created, function(err, results){
