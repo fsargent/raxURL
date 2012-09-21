@@ -4,6 +4,7 @@ block append css
       body {background-image:url('/images/rackspace_logo_guy.jpeg');  background-repeat:no-repeat; background-attachment:fixed; background-position: 95% 95%;}
 
 block content
+
   div.span6
     h5
       a(style="color:black",href="/logout").pull-right
@@ -45,4 +46,5 @@ block content
             small.muted optional
           div.controls
             textarea(type="textbox", rows="3", name="notes") #{results.notes}
-        input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-inverse
+        div.control-group
+          input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-inverse
