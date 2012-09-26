@@ -188,11 +188,11 @@ app.get('/', function(req, res) {
 });
 
 
-app.get('/create', requiresLogin, function(req, res) {
+app.get('/create', function(req, res) {
   return res.render('index');
 });
 
-app.get('/edit/:url', requiresLogin, function(req,res){
+app.get('/edit/:url', function(req,res){
   var short_url = req.params.url;
   db.get_by_short_url(short_url, function(err, results){
     if (results === undefined) {
@@ -219,7 +219,7 @@ app.get('/qr/:url', function (req,res) {
 
 // This is where the magic happens!
 app.get('/:url', url_lookup);
-app.post('/edit/:url', requiresLogin, function(req, res) {
+app.post('/edit/:url', function(req, res) {
   var data = req.body;
   var long_url = data.long_url;
   var short_url = req.params.url;
@@ -246,7 +246,7 @@ app.post('/edit/:url', requiresLogin, function(req, res) {
 });
 
 
-app.post('/create', requiresLogin, function(req, res) {
+app.post('/create', function(req, res) {
   var data = req.body;
   var long_url = data.long_url;
   var short_url = data.short_url;
