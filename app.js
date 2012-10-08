@@ -13,7 +13,6 @@ var url = require('url'),
     db = require('./db'),
     log = require('./log'),
 
-    ldap = require('ldapjs'),
     utils = require('./utils'),
     qr = require('./qrcode'),
     memStore = new express.session.MemoryStore(),
@@ -27,7 +26,10 @@ app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.cookieParser());
-  app.use(express.session({secret: settings.mem_store_secret,  store: memStore }));
+  app.use(express.session({
+    secret: settings.mem_store_secret,
+    store: memStore
+  }));
   app.use(express.favicon());
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
@@ -78,54 +80,62 @@ function url_lookup(req, res, next) {
 }
 
 
-function authenticate(username, password, cb) {
+// function authenticate(username, password, cb) {
 
-  var LDAP_HOST = settings.ldap_host,
-      LDAP_DN = settings.ldap_dn,
-      dn = util.format('cn=%s,ou=Users,%s', username, LDAP_DN),
-      client = ldap.createClient({
-        url: 'ldaps://' + LDAP_HOST,
-        timeout: 3000 // timeout is 3 seconds.
-      });
+//   var LDAP_HOST = settings.ldap_host,
+//       LDAP_DN = settings.ldap_dn,
+//       dn = util.format('cn=%s,ou=Users,%s', username, LDAP_DN),
+//       client = ldap.createClient({
+//         url: 'ldaps://' + LDAP_HOST,
+//         timeout: 3000 // timeout is 3 seconds.
+//       });
 
-  client.on('timeout', function(err) {
-    err = 'LDAP lookup timed out.';
-    console.error(err);
-    return cb(err, null);
-  });
-  client.search(
-    LDAP_DN,
-    {
-      scope: 'base',
-      filter: '(uid='+username+')'
-    },
-    function(err, res) {
-      res.on('error', function(err) {
-        err = 'LDAP Error: ' + err.message;
-        console.error(err);
-        return cb(err, null);
-      });
-      res.on('end', function(result) {
-        client.bind(dn, password, function(err, response) {
-          if (err) {
-            err = "Authentication Failed.";
-            return cb(err, null);
-          } else {
-            return cb(null, "success");
-          }
-        });
-      });
-  });
-}
+//   client.on('timeout', function(err) {
+//     err = 'LDAP lookup timed out.';
+//     console.error(err);
+//     return cb(err, null);
+//   });
+//   client.search(
+//     LDAP_DN,
+//     {
+//       scope: 'base',
+//       filter: '(uid='+username+')'
+//     },
+//     function(err, res) {
+//       res.on('error', function(err) {
+//         err = 'LDAP Error: ' + err.message;
+//         console.error(err);
+//         return cb(err, null);
+//       });
+//       res.on('end', function(result) {
+//         client.bind(dn, password, function(err, response) {
+//           if (err) {
+//             err = "Authentication Failed.";
+//             return cb(err, null);
+//           } else {
+//             return cb(null, "success");
+//           }
+//         });
+//       });
+//   });
+// }
 
-function requiresLogin(req, res, next) {
-  if (req.session.username) {
-    next();
-  } else {
-    req.session.error = 'Access denied!';
-    res.redirect('/login');
-  }
-}
+// function requiresLogin(req, res, next) {
+//   if (req.session.username) {
+//     next();
+//   } else {
+//     req.session.error = 'Access denied!';
+//     res.redirect('/login');
+//   }
+// }
+
+// Crappy basic auth kludge.
+var requiresLogin = require('basic-auth')({
+  name: 'Access to All',
+  accounts: [
+    settings.basic_auth_string
+  ]
+}).auth;
 
 
 // ROUTES
@@ -161,12 +171,13 @@ app.get('/logout', function(req, res) {
 });
 
 app.get('/all', requiresLogin, function(req, res){
-  db.get_db().all("SELECT * FROM urls ORDER BY count DESC LIMIT 100;", function(err, rows){
-    if (err){
-      console.log(err);
-    }
-    headers = rows.length > 0 ? _.keys(rows[0]) : [];
-    res.render('by-count.jade', {rows: rows, headers: headers});
+  db.get_db().all("SELECT * FROM urls ORDER BY count DESC LIMIT 100;",
+    function(err, rows){
+      if (err){
+        console.log(err);
+      }
+      headers = rows.length > 0 ? _.keys(rows[0]) : [];
+      res.render('by-count.jade', {rows: rows, headers: headers});
   });
 });
 
@@ -232,7 +243,9 @@ app.post('/edit/:url', function(req, res) {
     return res.redirect('back');
   }
   if (long_url.indexOf('rax.io/'+short_url) !== -1) {
-    return res.render('index.jade', {err: 'Haha, nice try. Please do not try to create redirect loops.'});
+    return res.render('index.jade',
+      {err: 'Haha, nice try. Please do not try to create redirect loops.'}
+    );
   }
   db.edit_url(long_url, notes, updated_at, short_url, function(err, results){
     db.get_by_short_url(short_url, function(err, results){
@@ -255,24 +268,48 @@ app.post('/create', function(req, res) {
   var err;
 
   if (!long_url || !short_url){
-    return res.render('index.jade', {err: 'You must specify a long and short url.'});
+    return res.render('index.jade',
+      {err: 'You must specify a long and short url.'}
+    );
   }
 
   if (long_url.indexOf('rax.io/'+short_url) !== -1) {
-    return res.render('index.jade', {err: 'Haha, nice try. Please do not try to create redirect loops.'});
+    return res.render('index.jade',
+      {err: 'Haha, nice try. Please do not try to create redirect loops.'}
+    );
   }
-  db.add_url(long_url, short_url, notes, date_created, function(err, results){
-    var form = {msg: null, err: null, long_url: long_url, short_url: short_url, notes: notes};
+  db.add_url(long_url,
+    short_url,
+    notes,
+    date_created,
+    function(err, results){
+      var form = {
+        msg: null,
+        err: null,
+        long_url: long_url,
+        short_url: short_url,
+        notes: notes
+      };
 
-    if (utils.is_integrity_error(err)){
-      form.err = util.format("<strong>That short url already exists.</strong><br>Do you want to <a href='edit/%s'>edit</a> it?", short_url);
-    } else if (err){
-      form.err = err.toString();
-    }else{
-      form.msg = util.format("Successfully created your link: <br><a href='/%s'>http://rax.io/%s</a> <br>Generate your QR code here: <br><a href='edit/%s'>http://rax.io/edit/%s</a>", short_url, short_url, short_url, short_url);
-    }
+      if (utils.is_integrity_error(err)){
+        form.err = util.format(
+          "<strong>That short url already exists.</strong><br>" +
+          "Do you want to <a href='edit/%s'>edit</a> it?",
+          short_url
+        );
+      } else if (err){
+        form.err = err.toString();
+      }else{
+        form.msg = util.format(
+          "Successfully created your link: <br>" +
+          "<a href='/%s'>http://rax.io/%s</a><br>"+
+          "View your QR code here:<br>"+
+          "<a href='edit/%s'>http://rax.io/edit/%s</a>",
+          short_url, short_url, short_url, short_url
+        );
+      }
 
-    res.render('index.jade', form);
+      res.render('index.jade', form);
   });
 });
 
