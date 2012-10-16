@@ -84,6 +84,11 @@ module.exports = new utils.make_class({
     return self.db.get("SELECT * FROM urls WHERE short_url=?;",
       short_url, cb);
   },
+  get_hit_count_by_short_url: function(short_url, cb){
+    var self = this;
+    return self.db.get("SELECT count FROM urls WHERE short_url=?;",
+      short_url, cb);
+  },
   increment_url: function(short_url){
     var self = this;
 

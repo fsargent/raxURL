@@ -205,12 +205,20 @@ app.get('/create', function(req, res) {
 
 app.get('/edit/:url', function(req,res){
   var short_url = req.params.url;
+  var hit_count;
+  db.get_hit_count_by_short_url(short_url, function(err, results) {
+    if (err) {
+        console.log(err);
+    } else {
+        hit_count = results.count;
+    }
+  });
   db.get_by_short_url(short_url, function(err, results){
     if (results === undefined) {
       res.status(404);
       return res.render('404.jade');
     } else {
-      res.render('edit', {results: results});
+      res.render('edit', {results: results, hit_count: hit_count});
     }
   });
 });
