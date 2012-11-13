@@ -260,7 +260,7 @@ app.post('/edit/:url', function(req, res) {
       if (results === undefined) {
         res.redirect("/");
       } else {
-        res.render('edit', {results: results});
+        res.render('edit', {results: results, hit_count: hit_count});
       }
     });
   });
