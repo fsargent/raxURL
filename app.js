@@ -140,6 +140,11 @@ var requiresLogin = require('basic-auth')({
 
 // ROUTES
 
+app.all('/robots.txt', function(req, res) {
+  res.setHeader('Content-Type', 'text/plain');
+  res.send('User-agent: *\nDisallow: /');
+});
+
 app.get('/login', function(req,res){
   res.render('login', {flash: ""});
 });
@@ -238,6 +243,9 @@ app.get('/qr/:url', function (req,res) {
 
 // This is where the magic happens!
 app.get('/:url', url_lookup);
+// Woooo! From here on out it's all posts.
+
+
 app.post('/edit/:url', function(req, res) {
   var data = req.body;
   var long_url = data.long_url;

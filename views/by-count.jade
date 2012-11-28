@@ -1,7 +1,6 @@
 extends layout
 block append css
   style(type="text/css")
-    td
 
 block content
   div.span12
@@ -22,7 +21,7 @@ block content
           tr
             each data,key in row
               if (key === 'long_url')
-                td(style="word-break: break-word;")
+                td(style="word-break: break-word; width:200px")
                   if data.split(":")[0] === "https"
                     a(href=data)=data
                   else if data.split(":")[0] === "http"
@@ -35,4 +34,4 @@ block content
               else if (key === "created_at" || key === "updated_at")
                 td #{time(data)}
               else
-                td #{data}
+                td(style="word-break: break-word;") #{data}
