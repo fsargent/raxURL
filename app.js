@@ -7,6 +7,7 @@ var url = require('url'),
     path = require('path'),
     http = require('http'),
     util = require('util'),
+    ldap = require('ldapjs'),
 
     _ = require('underscore'),
     express = require('express'),
@@ -80,62 +81,62 @@ function url_lookup(req, res, next) {
 }
 
 
-// function authenticate(username, password, cb) {
+function authenticate(username, password, cb) {
 
-//   var LDAP_HOST = settings.ldap_host,
-//       LDAP_DN = settings.ldap_dn,
-//       dn = util.format('cn=%s,ou=Users,%s', username, LDAP_DN),
-//       client = ldap.createClient({
-//         url: 'ldaps://' + LDAP_HOST,
-//         timeout: 3000 // timeout is 3 seconds.
-//       });
+  var LDAP_HOST = settings.ldap_host,
+      LDAP_DN = settings.ldap_dn,
+      dn = util.format('cn=%s,ou=Users,%s', username, LDAP_DN),
+      client = ldap.createClient({
+        url: 'ldaps://' + LDAP_HOST,
+        timeout: 3000 // timeout is 3 seconds.
+      });
 
-//   client.on('timeout', function(err) {
-//     err = 'LDAP lookup timed out.';
-//     console.error(err);
-//     return cb(err, null);
-//   });
-//   client.search(
-//     LDAP_DN,
-//     {
-//       scope: 'base',
-//       filter: '(uid='+username+')'
-//     },
-//     function(err, res) {
-//       res.on('error', function(err) {
-//         err = 'LDAP Error: ' + err.message;
-//         console.error(err);
-//         return cb(err, null);
-//       });
-//       res.on('end', function(result) {
-//         client.bind(dn, password, function(err, response) {
-//           if (err) {
-//             err = "Authentication Failed.";
-//             return cb(err, null);
-//           } else {
-//             return cb(null, "success");
-//           }
-//         });
-//       });
-//   });
-// }
+  client.on('timeout', function(err) {
+    err = 'LDAP lookup timed out.';
+    console.error(err);
+    return cb(err, null);
+  });
+  client.search(
+    LDAP_DN,
+    {
+      scope: 'base',
+      filter: '(uid='+username+')'
+    },
+    function(err, res) {
+      res.on('error', function(err) {
+        err = 'LDAP Error: ' + err.message;
+        console.error(err);
+        return cb(err, null);
+      });
+      res.on('end', function(result) {
+        client.bind(dn, password, function(err, response) {
+          if (err) {
+            err = "Authentication Failed.";
+            return cb(err, null);
+          } else {
+            return cb(null, "success");
+          }
+        });
+      });
+  });
+}
 
-// function requiresLogin(req, res, next) {
-//   if (req.session.username) {
-//     next();
-//   } else {
-//     req.session.error = 'Access denied!';
-//     res.redirect('/login');
-//   }
-// }
+function requiresLogin(req, res, next) {
+  if (req.session.username) {
+    next();
+  } else {
+    req.session.error = 'Access denied!';
+    res.redirect('/login');
+  }
+}
 
-// Crappy basic auth kludge.
-var requiresLogin = require('basic-auth')({
-  name: 'Access to All',
-  accounts: [
-    settings.basic_auth_string
-  ]
-}).auth;
+// // Crappy basic auth kludge.
+// var requiresLogin = require('basic-auth')({
+//   name: 'Access to All',
+//   accounts: [
+//     settings.basic_auth_string
+//   ]
+// }).auth;
 
 
 // ROUTES
@@ -204,11 +205,11 @@ app.get('/', function(req, res) {
 });
 
 
-app.get('/create', function(req, res) {
+app.get('/create', requiresLogin , function(req, res) {
   return res.render('index');
 });
 
-app.get('/edit/:url', function(req,res){
+app.get('/edit/:url', requiresLogin, function(req,res){
   var short_url = req.params.url;
   var hit_count;
   db.get_hit_count_by_short_url(short_url, function(err, results) {
@@ -246,7 +247,7 @@ app.get('/:url', url_lookup);
 // Woooo! From here on out it's all posts.
 
 
-app.post('/edit/:url', function(req, res) {
+app.post('/edit/:url', requiresLogin, function(req, res) {
   var data = req.body;
   var long_url = data.long_url;
   var short_url = req.params.url;
@@ -275,7 +276,7 @@ app.post('/edit/:url', function(req, res) {
 });
 
 
-app.post('/create', function(req, res) {
+app.post('/create', requiresLogin, function(req, res) {
   var data = req.body;
   var long_url = data.long_url;
   var short_url = data.short_url;
