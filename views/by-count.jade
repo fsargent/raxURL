@@ -15,7 +15,11 @@ block content
       thead
         tr
           each header in headers
-            th=header
+            if (header === "is_public")
+              if (show_is_public)
+                th=header
+            else
+              th=header
       body
         each row in rows
           tr
@@ -33,5 +37,11 @@ block content
                   a(href="/edit/"+data)=data
               else if (key === "created_at" || key === "updated_at")
                 td #{time(data)}
+              else if (key === "is_public")
+                if (show_is_public)
+                  if (data === 0)
+                    td(style="color: #aaa;") no
+                  else
+                    td yes
               else
                 td(style="word-break: break-word;") #{data}
