@@ -175,14 +175,25 @@ app.get('/logout', function(req, res) {
   });
 });
 
-app.get('/all', requiresLogin, function(req, res){
+app.get('/all', function(req, res){
+  db.get_db().all("SELECT * FROM urls WHERE is_public=1 ORDER BY count DESC LIMIT 100;",
+    function(err, rows){
+      if (err){
+        console.log(err);
+      }
+      headers = rows.length > 0 ? _.keys(rows[0]) : [];
+      res.render('by-count.jade', {rows: rows, headers: headers, show_is_public: false});
+  });
+});
+
+app.get('/adminall', requiresLogin, function(req, res){
   db.get_db().all("SELECT * FROM urls ORDER BY count DESC LIMIT 100;",
     function(err, rows){
       if (err){
         console.log(err);
       }
       headers = rows.length > 0 ? _.keys(rows[0]) : [];
-      res.render('by-count.jade', {rows: rows, headers: headers});
+      res.render('by-count.jade', {rows: rows, headers: headers, show_is_public: true});
   });
 });
 
@@ -214,17 +225,18 @@ app.get('/edit/:url', function(req,res){
   db.get_hit_count_by_short_url(short_url, function(err, results) {
     if (err) {
         console.log(err);
+        hit_count = "?";
     } else {
         hit_count = results.count;
     }
-  });
-  db.get_by_short_url(short_url, function(err, results){
-    if (results === undefined) {
-      res.status(404);
-      return res.render('404.jade');
-    } else {
-      res.render('edit', {results: results, hit_count: hit_count});
-    }
+    db.get_by_short_url(short_url, function(err, results){
+      if (results === undefined) {
+        res.status(404);
+        return res.render('404.jade');
+      } else {
+        res.render('edit', {results: results, hit_count: hit_count});
+      }
+    });
   });
 });
 
@@ -251,6 +263,12 @@ app.post('/edit/:url', function(req, res) {
   var long_url = data.long_url;
   var short_url = req.params.url;
   var notes = data.notes;
+  var is_public = data.is_public;
+  if (_.isUndefined(is_public)) {
+    is_public = 0;
+  } else {
+    is_public = 1;
+  }
   var updated_at = new Date();
   var err;
 
@@ -263,12 +281,12 @@ app.post('/edit/:url', function(req, res) {
       {err: 'Haha, nice try. Please do not try to create redirect loops.'}
     );
   }
-  db.edit_url(long_url, notes, updated_at, short_url, function(err, results){
+  db.edit_url(long_url, notes, is_public, updated_at, short_url, function(err, results){
     db.get_by_short_url(short_url, function(err, results){
       if (results === undefined) {
         res.redirect("/");
       } else {
-        res.render('edit', {results: results, hit_count: hit_count});
+        res.render('edit', {results: results, hit_count: results.count});
       }
     });
   });
@@ -280,6 +298,12 @@ app.post('/create', function(req, res) {
   var long_url = data.long_url;
   var short_url = data.short_url;
   var notes = data.notes;
+  var is_public = data.is_public;
+  if (_.isUndefined(is_public)) {
+    is_public = 0;
+  } else {
+    is_public = 1;
+  }
   var date_created = new Date();
   var err;
 
@@ -297,6 +321,7 @@ app.post('/create', function(req, res) {
   db.add_url(long_url,
     short_url,
     notes,
+    is_public,
     date_created,
     function(err, results){
       var form = {
@@ -304,6 +329,7 @@ app.post('/create', function(req, res) {
         err: null,
         long_url: long_url,
         short_url: short_url,
+        is_public: is_public,
         notes: notes
       };
 
