@@ -15,7 +15,7 @@ block content
         |rax.io
       span.muted
         a(style="color:#999", href="http://rax.io/#{results.short_url}") /#{results.short_url}
-      | 
+      |
       abbr(title="Hit count")
         span.btn.btn-inverse #{hit_count}
     hr
@@ -49,5 +49,13 @@ block content
             small.muted optional
           div.controls
             textarea(type="textbox", rows="3", name="notes") #{results.notes}
+        div.control-group
+          label(for="is_public").control-label
+            | Show in <a href="/all">Public Listing</a>?
+          div.controls
+            if (results.is_public)
+              input(type="checkbox", name="is_public", "checked")
+            else
+              input(type="checkbox", name="is_public")
         div.control-group
           input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-inverse
