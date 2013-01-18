@@ -19,6 +19,7 @@ block content
       -var long_url = long_url
       -var short_url = short_url
       -var notes = notes
+      -var is_public = is_public
       -var err = err
       -var msg = msg
       form(id="add-url", method="POST").form-horizontal
@@ -49,6 +50,14 @@ block content
           div.controls
             textarea(type="textbox", rows="3", name="notes")=notes
         div.control-group
+          label(for="is_public").control-label
+            | Show in <a href="/all">Public Listing</a>?
+          div.controls
+            input(
+              type="checkbox", name="is_public",
+              value=is_public
+            )
+        div.control-group
           input(id="add-url-submit", type="submit", value="Save").pull-right.btn.btn-inverse
 
         div.control-group.span5
@@ -61,10 +70,10 @@ block content
       hr
       h2 Features
       div
-        h4 Fast searches on 
+        h4 Fast searches on
           a(style="color:black", href="http://search.rackspace.com") search.rackspace.com
         pre
-          | rax.io/?knowledge management 
+          | rax.io/?knowledge management
           i.icon-arrow-right
           br
           | https://search.rackspace.com/
@@ -79,6 +88,6 @@ block content
         h4 Easy Edit
         p Modify the url to get QR Codes and edit details:
         pre.prettyprint
-          |rax.io/401k 
+          |rax.io/401k
           i.icon-arrow-right
           |  rax.io/edit/401k

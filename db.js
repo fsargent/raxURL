@@ -34,6 +34,7 @@ var SCHEMA = [
   "short_url VARCHAR(1024) NOT NULL, " +
   "count INTEGER DEFAULT 1, " +
   "notes TEXT, " +
+  "is_public INTEGER DEFAULT 0, " +
   "created_at TIMESTAMP, " +
   "updated_at TIMESTAMP, " +
   "UNIQUE(short_url)); "
@@ -94,7 +95,7 @@ module.exports = new utils.make_class({
 
     return self.db.run("UPDATE urls SET count = count + 1 WHERE short_url = ?", short_url);
   },
-  edit_url: function (long_url, notes, updated_at, short_url, cb) {
+  edit_url: function (long_url, notes, is_public, updated_at, short_url, cb) {
     var self = this;
     // try{
     //   long_url = validate_url(long_url);
@@ -102,7 +103,7 @@ module.exports = new utils.make_class({
     // } catch(e){
     //   return cb(e);
     // }
-    return self.db.run("UPDATE urls SET long_url = ?, notes = ?, updated_at = ? WHERE short_url = ?;", [long_url, notes, updated_at, short_url], function(err){
+    return self.db.run("UPDATE urls SET long_url = ?, notes = ?, is_public = ?, updated_at = ? WHERE short_url = ?;", [long_url, notes, is_public, updated_at, short_url], function(err){
       if (err){
         console.log(err);
         return cb(err);
@@ -112,7 +113,7 @@ module.exports = new utils.make_class({
       });
     });
   },
-  add_url: function (long_url, short_url, notes, created_at, cb) {
+  add_url: function (long_url, short_url, notes, is_public, created_at, cb) {
     var self = this;
     // try{
     //   long_url = validate_url(long_url);
@@ -120,7 +121,7 @@ module.exports = new utils.make_class({
     // } catch(e){
     //   return cb(e);
     // }
-    return self.db.run("INSERT INTO urls (long_url, short_url, notes, created_at) VALUES (?, ?, ?, ?);", [long_url, short_url, notes, created_at], function(err){
+    return self.db.run("INSERT INTO urls (long_url, short_url, notes, is_public, created_at) VALUES (?, ?, ?, ?, ?);", [long_url, short_url, notes, is_public, created_at], function(err){
       if (err){
         console.log(err);
         return cb(err);
